@@ -39,6 +39,16 @@ archives:
       - manifest.json
       - images/black.png
       - images/plexamp.png
+      - public/property-inspector.html
+      - public/assets/caret.svg
+      - public/assets/caret_closed.svg
+      - public/assets/check.png
+      - public/assets/check.svg
+      - public/assets/elg_calendar.svg
+      - public/assets/elg_calendar_inv.svg
+      - public/assets/rcheck.svg
+      - public/assets/tick.svg
+      - public/css/sdpi.css
 
 changelog:
   sort: asc
