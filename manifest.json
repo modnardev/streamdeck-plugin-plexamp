@@ -1,0 +1,37 @@
+{
+  "Actions": [
+    {
+      "Name": "Plexamp",
+      "Icon": "images/plexamp",
+      "SupportedInMultiActions": false,
+      "UUID": "dev.modnar.plexamp",
+      "States": [
+        {
+          "Image": "images/plexamp",
+          "Title": " ",
+          "TitleAlignment": "middle",
+          "FontSize": "11"
+        }
+      ]
+    }
+  ],
+  "SDKVersion": 2,
+  "Author": "Trevor Starick",
+  "Category": "Plexamp",
+  "CategoryIcon": "images/plexamp",
+  "Icon": "images/plexamp",
+  "CodePath": "streamdeck-plugin-plexamp.exe",
+  "Description": "Some description of what your plugin does",
+  "Name": "Example",
+  "URL": "",
+  "Version": "0.1",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "4.1"
+  }
+}

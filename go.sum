@@ -1,0 +1,4 @@
+github.com/SkYNewZ/streamdeck-sdk v0.0.0-20240717195007-952e26ef752e h1:ME0fAnyCzXajJqv+e99kRHq7EpCTT1NMxMa9/RYWetM=
+github.com/SkYNewZ/streamdeck-sdk v0.0.0-20240717195007-952e26ef752e/go.mod h1:GG5tQi4onotpvwJERm7hCJ74mP7tMxILBbCaxJMWMno=
+github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
+github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
