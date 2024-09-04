@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	PlexAmpAddress = "http://localhost:63460"
-	PlexAddress    = "http://192.168.1.100:32401"
+	PlexAmpAddress = ""
+	PlexAddress    = ""
+	RateOfRefresh  = time.Second / 1
 
 	defaultThumbnailData []byte
 
@@ -160,6 +161,10 @@ func getCurrentPlaying() (*MediaContainer, error) {
 	// Get the current playing media from Plex
 	// /player/timeline/poll?wait=0&includeMetadata=1&commandID=1
 
+	if PlexAmpAddress == "" {
+		return nil, fmt.Errorf("PlexAmpAddress is not set")
+	}
+
 	reqUrl := PlexAmpAddress + "/player/timeline/poll?wait=0&includeMetadata=1&commandID=1"
 	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
 	if err != nil {
@@ -203,12 +208,14 @@ func (playing *MediaContainer) getThumbnail() ([]byte, error) {
 	// /library/metadata/355914/thumb/1724958934
 	// $.MediaContainer.Timeline["thumb"]
 
+	if PlexAddress == "" {
+		return nil, fmt.Errorf("PlexAmpAddress is not set")
+	}
+
 	track, err := playing.getMusicTrack()
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(track.Track.Thumb)
 
 	if track == nil {
 		return nil, nil
@@ -226,8 +233,6 @@ func (playing *MediaContainer) getThumbnail() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(string(data[:10]))
 
 	return data, nil
 }
@@ -285,19 +290,56 @@ func log() {
 	slog.SetDefault(logger)
 }
 
+func parseAddress(address string) string {
+	address = strings.TrimSpace(address)
+	address = strings.TrimRight(address, "/")
+
+	if strings.HasPrefix(address, "http") {
+		return address
+	}
+
+	return "http://" + address
+}
+
+func parseSettingsPayload(payload map[string]any) error {
+	if s, ok := payload["settings"].(map[string]any); ok {
+		payload = s
+	}
+
+	if s, ok := payload["plex-address"].(string); ok {
+		PlexAddress = parseAddress(s)
+	}
+
+	if s, ok := payload["plexamp-address"].(string); ok {
+		PlexAmpAddress = parseAddress(s)
+	}
+
+	slog.Info("", "payload", payload)
+
+	return nil
+}
+
 func Handle(event *sdk.ReceivedEvent) error {
+	slog.Info("", "event", event)
+
 	switch event.Event {
 	case sdk.DeviceDidConnect:
 	case sdk.WillAppear:
 		contexts[event.Context] = struct{}{}
+		streamdeck.GetSettings(event.Context)
 	case sdk.TitleParametersDidChange:
 	case sdk.KeyDown:
 	case sdk.KeyUp:
 		// todo: start up plexamp, or show it if it's already running ideally with plexamp:// but that doesn't work right now (only plex://)
 	case sdk.WillDisappear:
 		delete(contexts, event.Context)
+	case sdk.PropertyInspectorDidAppear:
+	case sdk.PropertyInspectorDidDisappear:
+	case sdk.SendToPlugin:
+		parseSettingsPayload(event.Payload.Settings)
+	case sdk.DidReceiveSettings:
+		parseSettingsPayload(event.Payload.Settings)
 	default:
-		slog.Info("", "event", event)
 	}
 
 	return nil
@@ -339,15 +381,23 @@ func main() {
 
 	// update the thumbnails + current playback
 	go func() {
-		ticker := time.NewTicker(time.Second)
+		ticker := time.NewTicker(RateOfRefresh)
+
+		lastFilename := ""
 
 		for range ticker.C {
 			playing, err := getCurrentPlaying()
 			if err != nil {
+				slog.Error("error getting current playing", "error", err)
+
 				continue
 			}
 
 			if playing == nil {
+				lastFilename = ""
+
+				slog.Error("no playing media")
+
 				continue
 			}
 
@@ -367,9 +417,16 @@ func main() {
 
 			filename = strings.TrimSuffix(filename, ".png")
 
+			if filename == lastFilename {
+				continue
+			}
+
+			lastFilename = filename
+
 			for context := range contexts {
 				streamdeck.SetImage(context, filename)
 			}
+
 		}
 	}()
 
