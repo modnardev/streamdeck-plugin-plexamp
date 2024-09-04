@@ -4,7 +4,8 @@
       "Name": "Plexamp",
       "Icon": "images/plexamp",
       "SupportedInMultiActions": false,
-      "UUID": "dev.modnar.plexamp",
+      "UUID": "dev.modnar.plexamp.plexamp",
+      "PropertyInspectorPath": "public/property-inspector.html",
       "States": [
         {
           "Image": "images/plexamp",
